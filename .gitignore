@@ -40,3 +40,7 @@ env/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Dynamic upload artifacts
+uploaded_docs/
+

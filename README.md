@@ -16,9 +16,6 @@
 ![Version](https://img.shields.io/badge/Platform-v2.0%20Enterprise-a78bfa?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Live-24x7-ef4444?style=for-the-badge)
 
-**Candidate:** Prateek &nbsp;|&nbsp; **Role:** Forward Deployed Engineer (Full Time), Spyne
-**Site Under Audit:** Sparsh Motors, Kothrud Workshop (`KTD-04`)
-
 [📄 Submission PDF](Spyne_FDE_Case_Study_Pune_Workshop_Diagnostics.pdf) · [🚀 Quick Start](#-how-to-run-the-platform) · [🧪 Tests](#1-run-automated-test-suites)
 
 </div>

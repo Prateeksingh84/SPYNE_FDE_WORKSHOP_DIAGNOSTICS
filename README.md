@@ -1,12 +1,10 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,100:a78bfa&height=140&section=header&animation=twinkling" width="100%" alt="header wave"/>
+<img src="assets/wave-header.svg" width="100%" height="80" alt=""/>
 
 <img src="assets/pulse-banner.svg" alt="PulseWorkshop 24x7 animated banner" width="100%"/>
 
-<a href="https://github.com/DenverCoder1/readme-typing-svg">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&duration=3000&pause=900&color=22D3EE&center=true&vCenter=true&width=720&lines=Zero+Phantom+Bookings;Temporal+Alignment+%28UTC+%2B05%3A30+IST%29;Active+Job+Card+Intent+Routing;Unanswered+Transfer+Auto-Callback;Real-Time+Proxy+Guard+%26+Audit+Timeline" alt="Typing animation"/>
-</a>
+<img src="assets/typing.svg" alt="Zero Phantom Bookings · Temporal Alignment · Intent Routing · Auto-Callback · Proxy Guard" width="760"/>
 
 <br/>
 
@@ -26,22 +24,9 @@
 
 PulseWorkshop 24x7 is a production-grade automotive service diagnostics and guardrail platform built to run around the clock across multi-site dealership groups (Pune workshops, US retail dealerships).
 
-```mermaid
-flowchart TD
-    D["🖥️ PulseWorkshop 24x7 Dashboard<br/>1 Live Stream · 2 Document Ingestion · 3 Rules · 4 Timeline"]
-    D --> L["📞 Live Stream<br/>Telephony In (WebSockets)"]
-    D --> U["📄 Universal Doc Inspector<br/>PDF · TXT · DOCX"]
-    L --> E
-    U --> E
-    E["⚙️ Deterministic Invariant Engine<br/>• Booking Integrity (Zero Phantoms)<br/>• Temporal Alignment (UTC +05:30 IST)<br/>• Active Job Card Intent Router<br/>• Unanswered Transfer Auto-Callback<br/>• Site Capability & Hours Verifier"]
-    E --> P["🛡️ Real-Time Proxy Guard<br/>(Mitigation)"]
-    E --> H["🕒 Change Log & Audit History<br/>(Timeline)"]
-
-    style D fill:#14213d,stroke:#22d3ee,color:#fff
-    style E fill:#1e1b4b,stroke:#a78bfa,color:#fff
-    style P fill:#064e3b,stroke:#22c55e,color:#fff
-    style H fill:#3b0764,stroke:#a78bfa,color:#fff
-```
+<div align="center">
+<img src="assets/pipeline.svg" alt="Animated architecture: Dashboard feeds Live Stream and Doc Inspector into the Deterministic Invariant Engine, which drives the Proxy Guard and Audit Timeline" width="900"/>
+</div>
 
 ---
 
@@ -139,12 +124,8 @@ Open **<http://localhost:8000>** in your browser.
 | **4. Updates & History** | Review chronological change logs and post maintenance notes |
 | **Top header** | Click **"Download Case Study PDF"** for the official submission document |
 
----
-
 <div align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=14&duration=4000&pause=1000&color=94A3B8&center=true&vCenter=true&width=520&lines=Built+for+Spyne+FDE+Case+Study;Pune+Workshop+Service+Excellence+%E2%80%A2+Call+%26+Log+Diagnostics" alt="Footer typing"/>
-
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:a78bfa,100:22d3ee&height=100&section=footer" width="100%" alt="footer wave"/>
+<img src="assets/wave-footer.svg" width="100%" height="80" alt=""/>
 
 </div>

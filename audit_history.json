@@ -1,6 +1,217 @@
 [
   {
     "summary": {
+      "doc_id": "DOC-D4F51295",
+      "filename": "test_doc.txt",
+      "file_type": "TXT",
+      "file_size_bytes": 796,
+      "upload_timestamp": "2026-10-16 22:25:23 IST",
+      "site_id": "KTD-04",
+      "total_calls_detected": 1,
+      "reported_bookings": 1,
+      "verified_bookings": 1,
+      "phantom_bookings": 0,
+      "tz_corrupted_bookings": 0,
+      "open_job_card_calls": 0,
+      "total_violations_detected": 0,
+      "clean_call_count": 1,
+      "summary_verdict": "AUDIT COMPLETED: Clean Compliance"
+    },
+    "extracted_text_preview": "\n### C-99 | Mon, 10:00 am | 2 min 00 sec\n> **Caller:** I want to service my Baleno.\n> **Assistant:** Sure, I have Friday at 10 am.\n> **Caller:** Yes, please book it.\nLogged outcome: Appointment booked\n\nTool log\n10:00:10  lookup_customer      {\"phone\":\"9XXXXXX111\"}\n          -> {\"customer_id\":\"C9999\",\"open_job_cards\":[]}\n10:00:30  check_availability   {\"service_type\":\"periodic\"}\n          -> {\"slots\":[{\"slot_id\":\"S-999\",\"start\":\"2026-08-22T04:30:00Z\",\"start_local\":\"2026-08-22 10:00 IST\"}]}\n10:01:00  book_appointment     {\"customer_id\":\"C9999\",\"slot_id\":\"S-999\",\"service_type\":\"periodic\"}\n          -> {\"status\":\"ok\",\"appointment_id\":\"A-9999\",\"confirmed_local\":\"2026-08-22 10:00 IST\"}\n10:01:15  log_outcome          {\"outcome\":\"booked\",\"notes\":\"Baleno periodic\"}\n          -> {\"status\":\"ok\"}\n",
+    "calls": [
+      {
+        "call_id": "C-99",
+        "site_id": "KTD-04",
+        "day_of_week": "Mon",
+        "start_time": "10:00 am",
+        "duration_str": "2 min 00 sec",
+        "duration_seconds": 120,
+        "transcript": [
+          {
+            "role": "caller",
+            "text": "I want to service my Baleno."
+          },
+          {
+            "role": "assistant",
+            "text": "Sure, I have Friday at 10 am."
+          },
+          {
+            "role": "caller",
+            "text": "Yes, please book it."
+          }
+        ],
+        "tool_executions": [
+          {
+            "timestamp_local": "10:00:10",
+            "tool_name": "lookup_customer",
+            "arguments": {
+              "phone": "9XXXXXX111"
+            },
+            "response": {
+              "customer_id": "C9999",
+              "open_job_cards": []
+            },
+            "duration_ms": 0
+          },
+          {
+            "timestamp_local": "10:00:30",
+            "tool_name": "check_availability",
+            "arguments": {
+              "service_type": "periodic"
+            },
+            "response": {
+              "slots": [
+                {
+                  "slot_id": "S-999",
+                  "start": "2026-08-22T04:30:00Z",
+                  "start_local": "2026-08-22 10:00 IST"
+                }
+              ]
+            },
+            "duration_ms": 0
+          },
+          {
+            "timestamp_local": "10:01:00",
+            "tool_name": "book_appointment",
+            "arguments": {
+              "customer_id": "C9999",
+              "slot_id": "S-999",
+              "service_type": "periodic"
+            },
+            "response": {
+              "status": "ok",
+              "appointment_id": "A-9999",
+              "confirmed_local": "2026-08-22 10:00 IST"
+            },
+            "duration_ms": 0
+          },
+          {
+            "timestamp_local": "10:01:15",
+            "tool_name": "log_outcome",
+            "arguments": {
+              "outcome": "booked",
+              "notes": "Baleno periodic"
+            },
+            "response": {
+              "status": "ok"
+            },
+            "duration_ms": 0
+          }
+        ],
+        "logged_outcome": "Appointment booked",
+        "logged_notes": "Baleno periodic",
+        "customer_id": "C9999",
+        "open_job_cards": [],
+        "has_vehicle_inquiry": false,
+        "verified_outcome": "Appointment booked (Verified)",
+        "is_valid_booking": true,
+        "booking_id": "A-9999",
+        "agreed_time_spoken": null,
+        "system_booked_time": "2026-08-22 10:00 IST",
+        "time_discrepancy_minutes": null,
+        "violations": []
+      }
+    ],
+    "violations_breakdown": {}
+  },
+  {
+    "summary": {
+      "doc_id": "DOC-CC0C22ED",
+      "filename": "phantom_doc.txt",
+      "file_type": "TXT",
+      "file_size_bytes": 436,
+      "upload_timestamp": "2026-10-16 22:25:23 IST",
+      "site_id": "KTD-04",
+      "total_calls_detected": 1,
+      "reported_bookings": 1,
+      "verified_bookings": 0,
+      "phantom_bookings": 1,
+      "tz_corrupted_bookings": 0,
+      "open_job_card_calls": 0,
+      "total_violations_detected": 1,
+      "clean_call_count": 0,
+      "summary_verdict": "AUDIT COMPLETED: Severe Discrepancies Detected"
+    },
+    "extracted_text_preview": "\n### C-88 | Tue, 11:00 am | 1 min 30 sec\n> **Caller:** What does an oil change cost?\n> **Assistant:** Around Rs 3,000.\n> **Caller:** Thanks, I will check and call later.\nLogged outcome: Appointment booked\n\nTool log\n11:00:10  lookup_customer      {\"phone\":\"9XXXXXX222\"}\n          -> {\"customer_id\":\"C8888\",\"open_job_cards\":[]}\n11:00:30  log_outcome          {\"outcome\":\"booked\",\"notes\":\"oil change inquiry\"}\n          -> {\"status\":\"ok\"}\n",
+    "calls": [
+      {
+        "call_id": "C-88",
+        "site_id": "KTD-04",
+        "day_of_week": "Tue",
+        "start_time": "11:00 am",
+        "duration_str": "1 min 30 sec",
+        "duration_seconds": 90,
+        "transcript": [
+          {
+            "role": "caller",
+            "text": "What does an oil change cost?"
+          },
+          {
+            "role": "assistant",
+            "text": "Around Rs 3,000."
+          },
+          {
+            "role": "caller",
+            "text": "Thanks, I will check and call later."
+          }
+        ],
+        "tool_executions": [
+          {
+            "timestamp_local": "11:00:10",
+            "tool_name": "lookup_customer",
+            "arguments": {
+              "phone": "9XXXXXX222"
+            },
+            "response": {
+              "customer_id": "C8888",
+              "open_job_cards": []
+            },
+            "duration_ms": 0
+          },
+          {
+            "timestamp_local": "11:00:30",
+            "tool_name": "log_outcome",
+            "arguments": {
+              "outcome": "booked",
+              "notes": "oil change inquiry"
+            },
+            "response": {
+              "status": "ok"
+            },
+            "duration_ms": 0
+          }
+        ],
+        "logged_outcome": "Appointment booked",
+        "logged_notes": "oil change inquiry",
+        "customer_id": "C8888",
+        "open_job_cards": [],
+        "has_vehicle_inquiry": false,
+        "verified_outcome": "Phantom Booking (Zero Appointment)",
+        "is_valid_booking": false,
+        "booking_id": null,
+        "agreed_time_spoken": null,
+        "system_booked_time": null,
+        "time_discrepancy_minutes": null,
+        "violations": [
+          {
+            "call_id": "C-88",
+            "violation_type": "PHANTOM_BOOKING",
+            "severity": "P0_CRITICAL",
+            "tool_name": "log_outcome",
+            "timestamp": "11:00:30",
+            "summary": "Phantom Booking Logged: 'Appointment booked' without executing book_appointment",
+            "detail": "Call closed as booked (notes: oil change inquiry), but book_appointment was never invoked.",
+            "remediation_applied": "Outcome downgraded to 'no_action' or 'callback'"
+          }
+        ]
+      }
+    ],
+    "violations_breakdown": {
+      "PHANTOM_BOOKING": 1
+    }
+  },
+  {
+    "summary": {
       "doc_id": "DOC-6DBB9E62",
       "filename": "test_doc.txt",
       "file_type": "TXT",

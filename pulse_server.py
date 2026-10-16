@@ -223,6 +223,42 @@ def download_case_study_pdf():
         )
     raise HTTPException(status_code=404, detail="PDF not found")
 
+@app.get("/api/download/submission-pdf")
+def download_submission_pdf():
+    pdf_path = os.path.join(os.path.dirname(__file__), "Spyne_FDE_Case_Study_Submission.pdf")
+    if not os.path.exists(pdf_path):
+        try:
+            from generate_submission_pdf import build_pdf
+            build_pdf(pdf_path)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to generate submission PDF: {e}")
+            
+    if os.path.exists(pdf_path):
+        return FileResponse(
+            pdf_path,
+            media_type="application/pdf",
+            headers={"Content-Disposition": "inline; filename=Spyne_FDE_Case_Study_Submission.pdf"},
+            filename="Spyne_FDE_Case_Study_Submission.pdf"
+        )
+    raise HTTPException(status_code=404, detail="Submission PDF not found")
+
+@app.get("/api/download/session-log")
+def download_session_log(format: str = "md"):
+    filename = "AI_Session_Log.txt" if format == "txt" else "AI_Session_Log.md"
+    log_path = os.path.join(os.path.dirname(__file__), filename)
+    if not os.path.exists(log_path):
+        log_path = os.path.join(os.path.dirname(__file__), "AI_Session_Log.md")
+    if os.path.exists(log_path):
+        media_type = "text/plain" if format == "txt" else "text/markdown"
+        return FileResponse(
+            log_path,
+            media_type=media_type,
+            headers={"Content-Disposition": f"inline; filename={filename}"},
+            filename=filename
+        )
+    raise HTTPException(status_code=404, detail="Session log not found")
+
+
 @app.post("/api/simulate-call")
 async def simulate_incoming_call(scenario: str = "phantom_booking"):
     sample_id = f"SIM-{len(audited_sessions)+1:02d}"

@@ -5,242 +5,357 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PulseWorkshop 24x7 | Dealership Call & Log Diagnostics</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(1.15); }
+    /* Robust Base CSS to guarantee zero layout overlap even if CDN lags */
+    *, ::before, ::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    .live-pulse {
-      animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    body {
+      background-color: #030712;
+      color: #f3f4f6;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
     .custom-scroll::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #111827;
+    }
     .custom-scroll::-webkit-scrollbar-thumb {
       background: #374151;
       border-radius: 4px;
     }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #4b5563;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .live-pulse {
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* Modal Display Rules (Eliminates hidden vs flex collisions) */
+    .modal-hidden {
+      display: none !important;
+    }
+    .modal-visible {
+      display: flex !important;
+    }
+
+    /* Table Fixes */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 0.75rem;
+      border: 1px solid #1f2937;
+      background-color: #111827;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 0.75rem;
+    }
+    table.data-table th, table.data-table td {
+      padding: 0.75rem 0.85rem;
+      text-align: left;
+      vertical-align: middle;
+      border-bottom: 1px solid #1f2937;
+    }
+    table.data-table th {
+      background-color: #0b0f17;
+      color: #9ca3af;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    table.data-table tr:hover {
+      background-color: rgba(31, 41, 55, 0.5);
+    }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased custom-scroll">
+<body class="custom-scroll antialiased selection:bg-indigo-500 selection:text-white">
 
-  <!-- Header -->
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40 px-6 py-4 flex flex-wrap items-center justify-between gap-4">
-    <div class="flex items-center gap-3">
-      <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-        <i class="fa-solid fa-car-tunnel text-white text-lg"></i>
-      </div>
-      <div>
-        <div class="flex items-center gap-2">
-          <h1 class="text-xl font-bold tracking-tight text-white">PulseWorkshop <span class="text-cyan-400">24x7</span></h1>
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <span class="h-2 w-2 rounded-full bg-emerald-400 live-pulse"></span>
-            Real-Time Engine Active
-          </span>
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-gray-800 bg-gray-900/90 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-8 py-3.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand & Status -->
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white font-black text-lg">
+          PW
         </div>
-        <p class="text-xs text-slate-400">Automotive AI Telephony & Log Diagnostic System | Site: <span id="siteBadge" class="text-slate-200 font-semibold">Sparsh Motors, Kothrud (KTD-04)</span></p>
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h1 class="text-lg font-bold tracking-tight text-white">PulseWorkshop <span class="text-cyan-400">24x7</span></h1>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <span class="h-2 w-2 rounded-full bg-emerald-400 live-pulse"></span>
+              Live Telephony Ingest
+            </span>
+          </div>
+          <p class="text-xs text-gray-400 mt-0.5">
+            AI Call & Log Diagnostics Engine &bull; Site: <strong class="text-gray-200">Sparsh Motors, Kothrud (KTD-04)</strong>
+          </p>
+        </div>
       </div>
-    </div>
 
-    <!-- Actions -->
-    <div class="flex items-center gap-3">
-      <div class="flex items-center gap-2 bg-slate-800/80 p-1 rounded-lg border border-slate-700 text-xs">
-        <button onclick="triggerSimulation('phantom_booking')" class="px-3 py-1.5 rounded-md hover:bg-slate-700 transition flex items-center gap-1.5 text-amber-400 font-medium">
-          <i class="fa-solid fa-shield-halved"></i> Sim Phantom Intercept
-        </button>
-        <button onclick="triggerSimulation('timezone_drift_prevented')" class="px-3 py-1.5 rounded-md hover:bg-slate-700 transition flex items-center gap-1.5 text-cyan-400 font-medium">
-          <i class="fa-solid fa-clock-rotate-left"></i> Sim Timezone Fix
-        </button>
+      <!-- Quick Action Controls -->
+      <div class="flex flex-wrap items-center gap-2.5 text-xs">
+        <div class="flex items-center bg-gray-800/80 p-1 rounded-lg border border-gray-700">
+          <button onclick="triggerSimulation('phantom_booking')" class="px-3 py-1.5 rounded-md hover:bg-gray-700 text-amber-300 font-semibold transition flex items-center gap-1.5">
+            <span>🛡️</span> Sim Phantom Intercept
+          </button>
+          <button onclick="triggerSimulation('timezone_drift_prevented')" class="px-3 py-1.5 rounded-md hover:bg-gray-700 text-cyan-300 font-semibold transition flex items-center gap-1.5">
+            <span>⏰</span> Sim Timezone Fix
+          </button>
+        </div>
+        <a href="/api/calls" target="_blank" class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 font-medium border border-gray-700 transition flex items-center gap-1.5">
+          <span>⚡</span> Raw JSON API
+        </a>
       </div>
-      <a href="/api/calls" target="_blank" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 flex items-center gap-2">
-        <i class="fa-solid fa-code"></i> Raw JSON API
-      </a>
+
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+  <!-- Main Content Layout -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-8">
 
-    <!-- KPI Section: The Reality Check -->
-    <section>
-      <div class="flex items-center justify-between mb-4">
+    <!-- KPI Section: Discrepancy Matrix -->
+    <section class="space-y-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
-            <i class="fa-solid fa-scale-unbalanced text-amber-400"></i> Executive Audit: Claimed Summary vs Verified Reality
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span>📊</span> Executive Audit: Weekly Summary vs. Verified Reality
           </h2>
-          <p class="text-xs text-slate-400">Discrepancy detected between AI reported weekly summary and audited ground truth.</p>
+          <p class="text-xs text-gray-400">Deterministic verification of all 20 calls against operational invariants.</p>
         </div>
-        <span class="text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1 rounded-full font-semibold flex items-center gap-1.5">
-          <i class="fa-solid fa-triangle-exclamation"></i> 77.8% Booking False-Positive Rate
-        </span>
+        <div class="self-start sm:self-auto">
+          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/30">
+            ⚠️ 77.8% False-Positive Rate in Reported Bookings
+          </span>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <!-- Card 1 -->
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 relative overflow-hidden shadow-sm">
-          <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Reported Bookings</span>
-            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-bold">Unchecked</span>
+      <!-- 5-Card Responsive Grid with guaranteed non-overlap -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
+        
+        <!-- Card 1: Reported Bookings -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col justify-between shadow-sm min-w-0">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Reported Bookings</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-bold border border-blue-500/20">Unchecked</span>
           </div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-3xl font-extrabold text-blue-400" id="statReportedBookings">9</span>
-            <span class="text-xs text-slate-400">of 20 (45%)</span>
+          <div>
+            <div class="flex items-baseline gap-2">
+              <span id="statReportedBookings" class="text-2xl sm:text-3xl font-extrabold text-blue-400">9</span>
+              <span class="text-xs text-gray-400">of 20 (45.0%)</span>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-2 leading-tight">Claimed in weekly summary report sent to workshop manager.</p>
           </div>
-          <p class="text-xs text-slate-500 mt-2">What Sparsh management was told in weekly report.</p>
         </div>
 
-        <!-- Card 2 -->
-        <div class="bg-slate-900 border border-emerald-900/50 rounded-xl p-4 relative overflow-hidden shadow-sm bg-gradient-to-b from-emerald-950/20 to-slate-900">
-          <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-medium text-emerald-400 uppercase tracking-wider">Verified Bookings</span>
-            <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold">Audited</span>
+        <!-- Card 2: Verified Bookings -->
+        <div class="bg-gray-900 border border-emerald-900/60 rounded-xl p-4 flex flex-col justify-between shadow-sm bg-gradient-to-b from-emerald-950/25 to-gray-900 min-w-0">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">Verified Bookings</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">Audited</span>
           </div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-3xl font-extrabold text-emerald-400" id="statVerifiedBookings">2</span>
-            <span class="text-xs text-slate-400">of 20 (10%)</span>
+          <div>
+            <div class="flex items-baseline gap-2">
+              <span id="statVerifiedBookings" class="text-2xl sm:text-3xl font-extrabold text-emerald-400">2</span>
+              <span class="text-xs text-emerald-400/90">of 20 (10.0%)</span>
+            </div>
+            <p class="text-[11px] text-emerald-300/80 mt-2 leading-tight">Only C-01 & C-18 were legitimately booked without errors.</p>
           </div>
-          <p class="text-xs text-emerald-500/80 mt-2">Only C-01 & C-18 correctly booked without time drift.</p>
         </div>
 
-        <!-- Card 3 -->
-        <div class="bg-slate-900 border border-red-900/50 rounded-xl p-4 relative overflow-hidden shadow-sm bg-gradient-to-b from-red-950/20 to-slate-900">
-          <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-medium text-red-400 uppercase tracking-wider">Phantom Bookings</span>
-            <span class="text-xs px-2 py-0.5 rounded bg-red-500/10 text-red-400 font-bold">P0 Critical</span>
+        <!-- Card 3: Phantom Bookings -->
+        <div class="bg-gray-900 border border-red-900/60 rounded-xl p-4 flex flex-col justify-between shadow-sm bg-gradient-to-b from-red-950/25 to-gray-900 min-w-0">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-semibold text-red-400 uppercase tracking-wider">Phantom Bookings</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-400 font-bold border border-red-500/20">P0 Critical</span>
           </div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-3xl font-extrabold text-red-400" id="statPhantomBookings">5</span>
-            <span class="text-xs text-slate-400">of 9 reported (55.6%)</span>
+          <div>
+            <div class="flex items-baseline gap-2">
+              <span id="statPhantomBookings" class="text-2xl sm:text-3xl font-extrabold text-red-400">5</span>
+              <span class="text-xs text-red-400/90">of 9 reported (55.6%)</span>
+            </div>
+            <p class="text-[11px] text-red-300/80 mt-2 leading-tight">Logged as "booked" without appointment confirmation.</p>
           </div>
-          <p class="text-xs text-red-400/80 mt-2">Logged as "booked" without appointment confirmation.</p>
         </div>
 
-        <!-- Card 4 -->
-        <div class="bg-slate-900 border border-amber-900/50 rounded-xl p-4 relative overflow-hidden shadow-sm bg-gradient-to-b from-amber-950/20 to-slate-900">
-          <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-medium text-amber-400 uppercase tracking-wider">Timezone Drift</span>
-            <span class="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold">5.5h Offset</span>
+        <!-- Card 4: Timezone Drift -->
+        <div class="bg-gray-900 border border-amber-900/60 rounded-xl p-4 flex flex-col justify-between shadow-sm bg-gradient-to-b from-amber-950/25 to-gray-900 min-w-0">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-semibold text-amber-400 uppercase tracking-wider">Timezone Drift</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold border border-amber-500/20">+5.5h Off</span>
           </div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-3xl font-extrabold text-amber-400" id="statTzCorrupted">2</span>
-            <span class="text-xs text-slate-400">of 4 booked (50%)</span>
+          <div>
+            <div class="flex items-baseline gap-2">
+              <span id="statTzCorrupted" class="text-2xl sm:text-3xl font-extrabold text-amber-400">2</span>
+              <span class="text-xs text-amber-400/90">of 4 booked (50.0%)</span>
+            </div>
+            <p class="text-[11px] text-amber-300/80 mt-2 leading-tight">C-08 & C-09 booked 5.5 hours later than callers were promised.</p>
           </div>
-          <p class="text-xs text-amber-400/80 mt-2">C-08 & C-09 booked 5.5 hours later than customer told.</p>
         </div>
 
-        <!-- Card 5 -->
-        <div class="bg-slate-900 border border-purple-900/50 rounded-xl p-4 relative overflow-hidden shadow-sm bg-gradient-to-b from-purple-950/20 to-slate-900">
-          <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-medium text-purple-400 uppercase tracking-wider">Vehicle Status Ignored</span>
-            <span class="text-xs px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 font-bold">0% Resolution</span>
+        <!-- Card 5: Vehicle Status Ignored -->
+        <div class="bg-gray-900 border border-purple-900/60 rounded-xl p-4 flex flex-col justify-between shadow-sm bg-gradient-to-b from-purple-950/25 to-gray-900 min-w-0">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-semibold text-purple-400 uppercase tracking-wider">Vehicle Status Bypassed</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 font-bold border border-purple-500/20">0% Used</span>
           </div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-3xl font-extrabold text-purple-400">0</span>
-            <span class="text-xs text-slate-400">of 8 job cards</span>
+          <div>
+            <div class="flex items-baseline gap-2">
+              <span class="text-2xl sm:text-3xl font-extrabold text-purple-400">0</span>
+              <span class="text-xs text-purple-400/90">of 8 job cards (0.0%)</span>
+            </div>
+            <p class="text-[11px] text-purple-300/80 mt-2 leading-tight">get_vehicle_status was never called once; callers were pitched slots.</p>
           </div>
-          <p class="text-xs text-purple-400/80 mt-2">get_vehicle_status tool was never once executed.</p>
         </div>
+
       </div>
     </section>
 
-    <!-- Filter & Live Stream Table -->
-    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <!-- Call Stream Table Section -->
+    <section class="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-xl space-y-4">
+      
+      <!-- Filter Bar -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <h3 class="text-base font-bold text-slate-100 flex items-center gap-2">
-            <i class="fa-solid fa-wave-square text-cyan-400"></i> Real-Time Telephony Call Stream & Log Diagnostics
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>📡</span> Live Telephony Stream & Log Diagnostics
           </h3>
-          <p class="text-xs text-slate-400">Live feed of all customer calls, tool logs, invariant checks, and automated remediations.</p>
+          <p class="text-xs text-gray-400">Click any row to open the complete end-to-end trace with tool logs and remediation.</p>
         </div>
 
         <!-- Filter Buttons -->
-        <div class="flex flex-wrap items-center gap-2 text-xs">
-          <button onclick="filterCalls('all')" id="btnFilterAll" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium">All (20)</button>
-          <button onclick="filterCalls('phantom')" id="btnFilterPhantom" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium">Phantom Bookings</button>
-          <button onclick="filterCalls('timezone')" id="btnFilterTimezone" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium">Timezone Drift</button>
-          <button onclick="filterCalls('jobcards')" id="btnFilterJobCards" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium">Active Job Cards</button>
-          <button onclick="filterCalls('verified')" id="btnFilterVerified" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium">Verified Clean</button>
+        <div class="flex flex-wrap items-center gap-1.5 text-xs">
+          <button onclick="filterCalls('all')" id="btnFilterAll" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold transition">
+            All (20)
+          </button>
+          <button onclick="filterCalls('phantom')" id="btnFilterPhantom" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium transition">
+            Phantom Bookings (5)
+          </button>
+          <button onclick="filterCalls('timezone')" id="btnFilterTimezone" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium transition">
+            Timezone Drift (2)
+          </button>
+          <button onclick="filterCalls('jobcards')" id="btnFilterJobCards" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium transition">
+            Active Job Cards (8)
+          </button>
+          <button onclick="filterCalls('verified')" id="btnFilterVerified" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium transition">
+            Verified Clean (2)
+          </button>
         </div>
       </div>
 
-      <!-- Table -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
-          <thead class="border-b border-slate-800 text-slate-400 uppercase font-semibold">
+      <!-- Responsive Table with explicit column widths -->
+      <div class="table-container custom-scroll">
+        <table class="data-table">
+          <colgroup>
+            <col style="width: 75px;">
+            <col style="width: 140px;">
+            <col style="width: 250px;">
+            <col style="width: 155px;">
+            <col style="width: 175px;">
+            <col style="width: 240px;">
+            <col style="width: 85px;">
+          </colgroup>
+          <thead>
             <tr>
-              <th class="py-3 px-4">Call ID</th>
-              <th class="py-3 px-4">Time & Duration</th>
-              <th class="py-3 px-4">Customer Request</th>
-              <th class="py-3 px-4">Reported Outcome</th>
-              <th class="py-3 px-4">Verified Ground Truth</th>
-              <th class="py-3 px-4">Invariant Violations</th>
-              <th class="py-3 px-4 text-right">Actions</th>
+              <th>Call ID</th>
+              <th>Time & Duration</th>
+              <th>Customer Request</th>
+              <th>Reported Outcome</th>
+              <th>Audited Ground Truth</th>
+              <th>Invariant Checks</th>
+              <th style="text-align: right;">Action</th>
             </tr>
           </thead>
-          <tbody id="callsTableBody" class="divide-y divide-slate-800/60 text-slate-300 font-normal">
-            <!-- Rendered dynamically -->
+          <tbody id="callsTableBody">
+            <!-- Dynamic Injection -->
           </tbody>
         </table>
       </div>
+
     </section>
 
   </main>
 
-  <!-- Detail Modal -->
-  <div id="callModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+  <!-- Interactive Call Inspection Modal (Hidden by default using .modal-hidden) -->
+  <div id="callModal" class="modal-hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 items-center justify-center p-3 sm:p-6">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+      
       <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+      <div class="px-6 py-4 border-b border-gray-800 flex items-center justify-between bg-gray-950/80">
         <div class="flex items-center gap-3">
-          <span id="modalCallId" class="text-lg font-bold text-white px-3 py-1 rounded-lg bg-indigo-600/30 text-indigo-400 border border-indigo-500/30">C-02</span>
+          <span id="modalCallId" class="text-base font-black px-2.5 py-1 rounded-lg bg-indigo-600/30 text-indigo-400 border border-indigo-500/30">C-02</span>
           <div>
-            <h4 id="modalHeaderTitle" class="text-sm font-semibold text-slate-200">Call Trace & Tool Diagnostics</h4>
-            <p id="modalHeaderSubtitle" class="text-xs text-slate-400">Time: Mon, 11:15 am | Duration: 1 min 48 sec</p>
+            <h4 class="text-sm font-bold text-white">Call Trace & Tool Execution Diagnostic</h4>
+            <p id="modalHeaderSubtitle" class="text-xs text-gray-400">Mon, 11:15 am &bull; 1 min 48 sec</p>
           </div>
         </div>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-white p-2 text-base transition">
-          <i class="fa-solid fa-xmark"></i>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-white px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-bold transition">
+          ✕ Close
         </button>
       </div>
 
-      <!-- Modal Body -->
-      <div class="p-6 overflow-y-auto space-y-6 custom-scroll">
-        <!-- Invariant Violations Banner -->
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-6 overflow-y-auto space-y-5 custom-scroll">
+        
+        <!-- Invariant Violations Container -->
         <div id="modalViolationsContainer" class="space-y-2"></div>
 
-        <!-- Two Columns: Transcript vs Tool Log -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Transcript -->
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
-            <h5 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-comments text-cyan-400"></i> Spoken Audio Transcript
+        <!-- 2-Column Split: Transcript vs Tool Log -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Column 1: Spoken Transcript -->
+          <div class="bg-gray-950 border border-gray-800 rounded-xl p-4 flex flex-col">
+            <h5 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <span>💬</span> Spoken Audio Transcript
             </h5>
-            <div id="modalTranscript" class="space-y-3 text-xs leading-relaxed max-h-96 overflow-y-auto custom-scroll pr-2"></div>
+            <div id="modalTranscript" class="space-y-2.5 text-xs max-h-80 overflow-y-auto custom-scroll pr-2"></div>
           </div>
 
-          <!-- Tool Timeline -->
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
-            <h5 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-terminal text-emerald-400"></i> Live Tool Execution Trace
+          <!-- Column 2: Tool Log Timeline -->
+          <div class="bg-gray-950 border border-gray-800 rounded-xl p-4 flex flex-col">
+            <h5 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <span>⚙️</span> Live Tool Execution Trace
             </h5>
-            <div id="modalToolLog" class="space-y-3 font-mono text-xs max-h-96 overflow-y-auto custom-scroll pr-2"></div>
+            <div id="modalToolLog" class="space-y-2.5 font-mono text-[11px] max-h-80 overflow-y-auto custom-scroll pr-2"></div>
           </div>
+
         </div>
 
-        <!-- Remediation & Operational Advice -->
-        <div id="modalRemediationBox" class="bg-indigo-950/30 border border-indigo-500/30 rounded-xl p-4 text-xs space-y-1.5 text-indigo-200">
-          <div class="font-bold flex items-center gap-2 text-indigo-300">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> 24x7 Real-Time Remediation Action Applied
+        <!-- Real-Time Proxy Remediation Note -->
+        <div class="bg-indigo-950/40 border border-indigo-500/30 rounded-xl p-4 text-xs space-y-1">
+          <div class="font-bold text-indigo-300 flex items-center gap-1.5">
+            <span>✨</span> Real-Time Proxy Guardrail Action
           </div>
-          <div id="modalRemediationText">Auto-mitigation notes</div>
+          <div id="modalRemediationText" class="text-indigo-200 leading-relaxed"></div>
         </div>
+
       </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3 border-t border-gray-800 bg-gray-950/60 flex justify-end">
+        <button onclick="closeModal()" class="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold transition">
+          Close Inspector
+        </button>
+      </div>
+
     </div>
   </div>
 
-  <!-- JavaScript Application Logic -->
+  <!-- Application Logic -->
   <script>
     let allCalls = [];
     let currentFilter = 'all';
@@ -270,16 +385,28 @@
 
     function filterCalls(filter) {
       currentFilter = filter;
-      const btns = ['btnFilterAll', 'btnFilterPhantom', 'btnFilterTimezone', 'btnFilterJobCards', 'btnFilterVerified'];
-      btns.forEach(b => {
-        const el = document.getElementById(b);
-        el.className = "px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium";
+      const buttons = {
+        'all': 'btnFilterAll',
+        'phantom': 'btnFilterPhantom',
+        'timezone': 'btnFilterTimezone',
+        'jobcards': 'btnFilterJobCards',
+        'verified': 'btnFilterVerified'
+      };
+
+      Object.entries(buttons).forEach(([key, id]) => {
+        const btn = document.getElementById(id);
+        if (key === filter) {
+          let activeColor = 'bg-indigo-600 text-white';
+          if (key === 'phantom') activeColor = 'bg-red-600 text-white';
+          if (key === 'timezone') activeColor = 'bg-amber-600 text-white';
+          if (key === 'jobcards') activeColor = 'bg-purple-600 text-white';
+          if (key === 'verified') activeColor = 'bg-emerald-600 text-white';
+          btn.className = `px-3 py-1.5 rounded-lg ${activeColor} font-semibold transition`;
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium transition';
+        }
       });
-      if (filter === 'all') document.getElementById('btnFilterAll').className = "px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium";
-      if (filter === 'phantom') document.getElementById('btnFilterPhantom').className = "px-3 py-1.5 rounded-lg bg-red-600 text-white font-medium";
-      if (filter === 'timezone') document.getElementById('btnFilterTimezone').className = "px-3 py-1.5 rounded-lg bg-amber-600 text-white font-medium";
-      if (filter === 'jobcards') document.getElementById('btnFilterJobCards').className = "px-3 py-1.5 rounded-lg bg-purple-600 text-white font-medium";
-      if (filter === 'verified') document.getElementById('btnFilterVerified').className = "px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium";
+
       renderTable();
     }
 
@@ -298,59 +425,66 @@
 
       filtered.forEach(call => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-800/40 transition cursor-pointer";
+        tr.className = "cursor-pointer transition";
         tr.onclick = () => openModal(call.call_id);
 
         const firstCallerTurn = call.transcript.find(t => t.role === 'caller')?.text || 'No spoken text';
-        
-        let reportedBadgeClass = "bg-slate-800 text-slate-400";
-        if (call.logged_outcome === 'Appointment booked') reportedBadgeClass = "bg-blue-500/10 text-blue-400 border border-blue-500/20";
-        else if (call.logged_outcome === 'Transferred to advisor') reportedBadgeClass = "bg-purple-500/10 text-purple-400 border border-purple-500/20";
-        else if (call.logged_outcome === 'Callback requested') reportedBadgeClass = "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20";
 
-        let verifiedBadgeClass = "bg-slate-800 text-slate-300";
-        if (call.is_valid_booking) verifiedBadgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold";
-        else if (call.verified_outcome.includes('Phantom')) verifiedBadgeClass = "bg-red-500/10 text-red-400 border border-red-500/20 font-bold";
-        else if (call.verified_outcome.includes('Corrupted')) verifiedBadgeClass = "bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold";
+        // Reported outcome style
+        let reportedBadge = "bg-gray-800 text-gray-400";
+        if (call.logged_outcome === 'Appointment booked') reportedBadge = "bg-blue-500/10 text-blue-400 border border-blue-500/20";
+        else if (call.logged_outcome === 'Transferred to advisor') reportedBadge = "bg-purple-500/10 text-purple-400 border border-purple-500/20";
+        else if (call.logged_outcome === 'Callback requested') reportedBadge = "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20";
 
+        // Verified outcome style
+        let verifiedBadge = "bg-gray-800 text-gray-300";
+        if (call.is_valid_booking) verifiedBadge = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold";
+        else if (call.verified_outcome.includes('Phantom')) verifiedBadge = "bg-red-500/10 text-red-400 border border-red-500/30 font-bold";
+        else if (call.verified_outcome.includes('Corrupted')) verifiedBadge = "bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold";
+
+        // Invariant Violations pills
         let violationPills = '';
         if (call.violations.length === 0) {
-          violationPills = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-check mr-1"></i> Clean</span>`;
+          violationPills = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✓ Clean</span>`;
         } else {
-          violationPills = call.violations.map(v => {
-            let col = v.severity === 'P0_CRITICAL' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-            return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border ${col} mr-1 mb-1">${v.violation_type}</span>`;
-          }).join('');
+          violationPills = `<div class="flex flex-wrap gap-1">` + call.violations.map(v => {
+            const isP0 = v.severity === 'P0_CRITICAL';
+            const cls = isP0 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+            return `<span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium border ${cls}">${v.violation_type}</span>`;
+          }).join('') + `</div>`;
         }
 
         tr.innerHTML = `
-          <td class="py-3 px-4 font-bold text-slate-200">${call.call_id}</td>
-          <td class="py-3 px-4">
-            <div class="font-medium text-slate-200">${call.day_of_week}, ${call.start_time}</div>
-            <div class="text-[11px] text-slate-500">${call.duration_str}</div>
+          <td class="font-bold text-white">${call.call_id}</td>
+          <td>
+            <div class="font-medium text-gray-200">${call.day_of_week}, ${call.start_time}</div>
+            <div class="text-[10px] text-gray-500">${call.duration_str}</div>
           </td>
-          <td class="py-3 px-4 max-w-xs truncate text-slate-300" title="${firstCallerTurn}">
-            ${firstCallerTurn}
+          <td>
+            <div class="truncate text-gray-300" title="${firstCallerTurn.replace(/"/g, '&quot;')}">
+              ${firstCallerTurn}
+            </div>
           </td>
-          <td class="py-3 px-4">
-            <span class="px-2.5 py-1 rounded-md text-[11px] font-medium ${reportedBadgeClass}">
+          <td>
+            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-medium ${reportedBadge}">
               ${call.logged_outcome}
             </span>
           </td>
-          <td class="py-3 px-4">
-            <span class="px-2.5 py-1 rounded-md text-[11px] ${verifiedBadgeClass}">
+          <td>
+            <span class="inline-block px-2 py-0.5 rounded text-[10px] ${verifiedBadge}">
               ${call.verified_outcome}
             </span>
           </td>
-          <td class="py-3 px-4">
+          <td>
             ${violationPills}
           </td>
-          <td class="py-3 px-4 text-right">
-            <button class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs">
-              Inspect <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
+          <td style="text-align: right;">
+            <button class="px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 text-[11px] font-semibold transition">
+              Inspect &rarr;
             </button>
           </td>
         `;
+
         tbody.appendChild(tr);
       });
     }
@@ -360,76 +494,87 @@
       if (!call) return;
 
       document.getElementById('modalCallId').textContent = call.call_id;
-      document.getElementById('modalHeaderSubtitle').textContent = `Day: ${call.day_of_week}, ${call.start_time} | Duration: ${call.duration_str} | Active JC: ${call.open_job_cards.join(', ') || 'None'}`;
+      document.getElementById('modalHeaderSubtitle').textContent = `${call.day_of_week}, ${call.start_time} &bull; Duration: ${call.duration_str} &bull; Active JC: ${call.open_job_cards.join(', ') || 'None'}`;
 
-      // Render Violations
+      // Invariant Violations
       const vContainer = document.getElementById('modalViolationsContainer');
       vContainer.innerHTML = '';
       if (call.violations.length === 0) {
         vContainer.innerHTML = `
-          <div class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
-            <i class="fa-solid fa-circle-check text-sm"></i>
-            <span><strong>All Invariants Satisfied:</strong> This call was handled cleanly without booking corruption, timezone errors, or dropped transfers.</span>
+          <div class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+            <span>✓</span>
+            <span><strong>All Invariants Satisfied:</strong> Handled cleanly without phantom bookings, timezone drift, or dropped escalations.</span>
           </div>
         `;
       } else {
         call.violations.forEach(v => {
-          const isCritical = v.severity === 'P0_CRITICAL';
+          const isP0 = v.severity === 'P0_CRITICAL';
+          const bgCls = isP0 ? 'bg-red-500/10 border-red-500/30 text-red-200' : 'bg-amber-500/10 border-amber-500/30 text-amber-200';
           vContainer.innerHTML += `
-            <div class="p-3 rounded-lg ${isCritical ? 'bg-red-500/10 border-red-500/20 text-red-300' : 'bg-amber-500/10 border-amber-500/20 text-amber-300'} border text-xs space-y-1">
-              <div class="font-bold flex items-center gap-2">
-                <i class="fa-solid fa-triangle-exclamation"></i> [${v.severity}] ${v.summary}
+            <div class="p-3 rounded-lg border ${bgCls} text-xs space-y-1">
+              <div class="font-bold flex items-center gap-1.5">
+                <span>⚠️</span> [${v.severity}] ${v.summary}
               </div>
-              <p class="text-slate-300">${v.detail}</p>
+              <p class="text-gray-300 text-[11px]">${v.detail}</p>
             </div>
           `;
         });
       }
 
-      // Render Transcript
+      // Transcript
       const tContainer = document.getElementById('modalTranscript');
       tContainer.innerHTML = '';
       call.transcript.forEach(turn => {
         const isCaller = turn.role === 'caller';
         tContainer.innerHTML += `
-          <div class="p-2.5 rounded-lg ${isCaller ? 'bg-slate-900 border border-slate-800' : 'bg-indigo-950/40 border border-indigo-900/40'}">
-            <span class="font-bold uppercase text-[10px] ${isCaller ? 'text-amber-400' : 'text-indigo-400'}">${turn.role}:</span>
-            <p class="mt-0.5 text-slate-200">${turn.text}</p>
+          <div class="p-2.5 rounded-lg ${isCaller ? 'bg-gray-900 border border-gray-800' : 'bg-indigo-950/50 border border-indigo-900/50'}">
+            <span class="font-bold uppercase text-[10px] ${isCaller ? 'text-amber-400' : 'text-cyan-400'}">${turn.role}:</span>
+            <p class="mt-0.5 text-gray-200 text-xs">${turn.text}</p>
           </div>
         `;
       });
 
-      // Render Tool Log
+      // Tool Log
       const toolContainer = document.getElementById('modalToolLog');
       toolContainer.innerHTML = '';
       call.tool_executions.forEach(tool => {
         toolContainer.innerHTML += `
-          <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
-            <div class="flex items-center justify-between text-slate-400 text-[10px]">
-              <span class="text-emerald-400 font-bold">${tool.timestamp_local} ${tool.tool_name}</span>
-            </div>
-            <div class="text-[11px] text-slate-300 break-all">${JSON.stringify(tool.arguments)}</div>
-            <div class="text-[11px] text-cyan-400/90 break-all pl-2 border-l border-cyan-800">
-              -&gt; ${JSON.stringify(tool.response)}
+          <div class="p-2.5 rounded-lg bg-gray-900 border border-gray-800 space-y-1">
+            <div class="text-emerald-400 font-bold">${tool.timestamp_local} ${tool.tool_name}</div>
+            <div class="text-gray-300 break-all">${JSON.stringify(tool.arguments)}</div>
+            <div class="text-cyan-400 break-all pl-2 border-l border-cyan-800/80">
+              &rarr; ${JSON.stringify(tool.response)}
             </div>
           </div>
         `;
       });
 
-      // Remediation Box
+      // Remediation
       const remBox = document.getElementById('modalRemediationText');
       if (call.violations.length > 0) {
-        remBox.innerHTML = call.violations.map(v => `• ${v.remediation_applied}`).join('<br>');
+        remBox.innerHTML = call.violations.map(v => `&bull; ${v.remediation_applied}`).join('<br>');
       } else {
-        remBox.textContent = "Verified compliant: no operational remediation required.";
+        remBox.textContent = "Verified compliant: call met all business and technical invariants.";
       }
 
-      document.getElementById('callModal').classList.remove('hidden');
+      // Open Modal
+      const modal = document.getElementById('callModal');
+      modal.classList.remove('modal-hidden');
+      modal.classList.add('modal-visible');
     }
 
     function closeModal() {
-      document.getElementById('callModal').classList.add('hidden');
+      const modal = document.getElementById('callModal');
+      modal.classList.remove('modal-visible');
+      modal.classList.add('modal-hidden');
     }
+
+    // Close on backdrop click
+    document.getElementById('callModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
 
     async function triggerSimulation(scenario) {
       try {
@@ -438,11 +583,10 @@
         await loadData();
         openModal(data.session.call_id);
       } catch (err) {
-        alert("Simulation failed: " + err);
+        alert("Simulation error: " + err);
       }
     }
 
-    // Connect WebSocket for live 24x7 event stream
     function initWebSocket() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const ws = new WebSocket(`${protocol}//${window.location.host}/ws/live-feed`);

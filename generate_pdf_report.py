@@ -257,13 +257,14 @@ We are updating the assistant tonight to fix status inquiries, correct booking t
         "Bug 4: transfer_to_advisor returning no_answer fails to invoke log_callback (C-02). Fix: auto-fallback to log_callback.",
         "Repro & Verification: Replay C-02, C-08, C-13; verify start_local present, zero phantom bookings, vehicle status queried."
     ]
-    ticket_table_data = [[Paragraph(f"<b>{i+1}.</b> {line}", code_style)] for i, line in enumerate(ticket_lines)]
+    ticket_table_data = [[Paragraph(f"<font color='#0369a1'><b>{i+1:02d}.</b></font>&nbsp; {line.replace('&', '&amp;')}", code_style)] for i, line in enumerate(ticket_lines)]
     t_ticket = Table(ticket_table_data, colWidths=[504])
     t_ticket.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#0f172a")),
-        ('TEXTCOLOR', (0,0), (-1,-1), colors.HexColor("#f8fafc")),
-        ('TOPPADDING', (0,0), (-1,-1), 2),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 2),
+        ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#f8fafc")),
+        ('BOX', (0,0), (-1,-1), 0.6, colors.HexColor("#cbd5e1")),
+        ('INNERGRID', (0,0), (-1,-1), 0.3, colors.HexColor("#e2e8f0")),
+        ('TOPPADDING', (0,0), (-1,-1), 2.5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
         ('LEFTPADDING', (0,0), (-1,-1), 6),
         ('RIGHTPADDING', (0,0), (-1,-1), 6),
     ]))

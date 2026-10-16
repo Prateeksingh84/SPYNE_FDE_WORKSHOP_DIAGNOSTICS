@@ -217,15 +217,16 @@ morning&rsquo;s calls together.""", sNote)]]
         "Bug 4: transfer_to_advisor returning no_answer fails to invoke log_callback (C-02). Fix: auto-fallback to log_callback.",
         "Repro & Verification: Replay C-02, C-08, C-13; verify start_local present, zero phantom bookings, vehicle status queried.",
     ]
-    td = [[Paragraph(f"<b>{i+1}.</b> {ln}", sCode)] for i, ln in enumerate(ticket_lines)]
+    td = [[Paragraph(f"<font color='#0369a1'><b>{i+1:02d}.</b></font>&nbsp; {ln.replace('&', '&amp;')}", sCode)] for i, ln in enumerate(ticket_lines)]
     tt = Table(td, colWidths=[504])
     tt.setStyle(TableStyle([
-        ("BACKGROUND",    (0, 0), (-1, -1), colors.HexColor("#0f172a")),
-        ("TEXTCOLOR",     (0, 0), (-1, -1), colors.HexColor("#e2e8f0")),
-        ("TOPPADDING",    (0, 0), (-1, -1), 2),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
-        ("LEFTPADDING",   (0, 0), (-1, -1), 5),
-        ("RIGHTPADDING",  (0, 0), (-1, -1), 5),
+        ("BACKGROUND",    (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
+        ("BOX",           (0, 0), (-1, -1), 0.6, colors.HexColor("#cbd5e1")),
+        ("INNERGRID",     (0, 0), (-1, -1), 0.3, colors.HexColor("#e2e8f0")),
+        ("TOPPADDING",    (0, 0), (-1, -1), 2.5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
+        ("LEFTPADDING",   (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING",  (0, 0), (-1, -1), 6),
     ]))
     story.append(tt)
     story.append(Spacer(1, 8))

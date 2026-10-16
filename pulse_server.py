@@ -207,10 +207,18 @@ async def add_operational_note(summary: str = Form(...), actor: str = Form("FDE 
 @app.get("/api/download/case-study-pdf")
 def download_case_study_pdf():
     pdf_path = os.path.join(os.path.dirname(__file__), "Spyne_FDE_Case_Study_Pune_Workshop_Diagnostics.pdf")
+    if not os.path.exists(pdf_path):
+        try:
+            from generate_pdf_report import create_case_study_pdf
+            create_case_study_pdf(pdf_path)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to generate PDF: {e}")
+            
     if os.path.exists(pdf_path):
         return FileResponse(
             pdf_path,
             media_type="application/pdf",
+            headers={"Content-Disposition": "inline; filename=Spyne_FDE_Case_Study_Pune_Workshop_Diagnostics.pdf"},
             filename="Spyne_FDE_Case_Study_Pune_Workshop_Diagnostics.pdf"
         )
     raise HTTPException(status_code=404, detail="PDF not found")

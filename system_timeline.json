@@ -1,0 +1,34 @@
+[
+  {
+    "id": "EVT-20261016160014676",
+    "timestamp": "2026-10-16 16:00:14 IST",
+    "event_type": "TEST_EVENT",
+    "actor": "FDE Operator",
+    "summary": "Testing timeline persistence",
+    "details": {
+      "meta": "123"
+    }
+  },
+  {
+    "id": "EVT-20261016090000",
+    "timestamp": "2026-10-16 09:00:00 IST",
+    "event_type": "SITE_PROVISIONED",
+    "actor": "System",
+    "summary": "Provisioned site profile KTD-04 (Sparsh Motors Kothrud)",
+    "details": {
+      "site_id": "KTD-04",
+      "schedule": "Mon-Sat 09:00-18:00 IST"
+    }
+  },
+  {
+    "id": "EVT-20261016091500",
+    "timestamp": "2026-10-16 09:15:00 IST",
+    "event_type": "INVARIANTS_ARMED",
+    "actor": "FDE Lead",
+    "summary": "Armed 5 deterministic invariants: Booking Integrity, UTC Drift, Active Job Cards, Transfer Escalation, Site Hours",
+    "details": {
+      "invariants_active": 5,
+      "severity_enforcement": "P0_BLOCKER"
+    }
+  }
+]

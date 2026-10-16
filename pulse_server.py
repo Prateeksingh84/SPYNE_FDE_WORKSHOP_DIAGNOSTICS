@@ -1,12 +1,12 @@
 """
-PulseWorkshop 24x7 - Real-Time Diagnostics & Monitoring Server
-FastAPI production application with REST API, WebSockets, and Live Dashboard.
+PulseWorkshop 24x7 - Real-Time Diagnostics & Enterprise Document Inspection Server
+FastAPI production application with REST API, WebSockets, Document Upload & Deep Inspection.
 """
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 import asyncio
 import json
 import os
@@ -17,11 +17,13 @@ from pulse_models import CallSession, SiteMetricComparison, InvariantViolation
 from pulse_loader import parse_call_records
 from pulse_invariants import InvariantEngine
 from pulse_proxy import ToolProxyMiddleware
+from pulse_doc_inspector import inspect_uploaded_document, load_audit_history, DocumentAuditResult
+from pulse_history import log_timeline_event, get_timeline_events
 
 app = FastAPI(
-    title="PulseWorkshop 24x7 - Automotive AI Diagnostics",
-    description="Real-time call telephony and tool log monitoring, invariant evaluation, and auto-remediation engine.",
-    version="1.0.0"
+    title="PulseWorkshop 24x7 - Automotive AI Diagnostics & Document Inspection",
+    description="Enterprise real-time call telephony and tool log monitoring, document upload inspection, invariant evaluation, and auto-remediation engine.",
+    version="2.0.0"
 )
 
 app.add_middleware(
@@ -65,11 +67,12 @@ manager = ConnectionManager()
 def get_health():
     return {
         "status": "healthy",
-        "service": "PulseWorkshop 24x7 Diagnostics Engine",
+        "service": "PulseWorkshop 24x7 Enterprise Diagnostics Engine",
         "active_site": config.active_site_id,
         "site_name": config.sites[config.active_site_id].site_name,
         "total_calls_tracked": len(audited_sessions),
-        "monitoring_active_24x7": True
+        "monitoring_active_24x7": True,
+        "supported_upload_formats": ["PDF", "TXT", "MD", "DOCX", "JSON"]
     }
 
 @app.get("/api/config")
@@ -77,13 +80,36 @@ def get_system_config():
     return config
 
 @app.post("/api/config")
-def update_system_config(updated: SystemConfig):
+async def update_system_config(updated: SystemConfig):
     global config, engine, proxy
     config = updated
     save_config(config)
     engine = InvariantEngine(config)
     proxy = ToolProxyMiddleware(config.sites.get(config.active_site_id))
+    
+    log_timeline_event(
+        event_type="CONFIG_UPDATED",
+        summary=f"System configuration updated dynamically (Active site: {config.active_site_id})",
+        details={"active_site": config.active_site_id, "sites": list(config.sites.keys())}
+    )
+    
+    await manager.broadcast({
+        "type": "CONFIG_UPDATED",
+        "config": config.model_dump()
+    })
     return {"status": "ok", "message": "Configuration updated dynamically"}
+
+@app.post("/api/sites/add")
+async def add_site_profile(site: SiteConfig):
+    global config
+    config.sites[site.site_id] = site
+    save_config(config)
+    log_timeline_event(
+        event_type="SITE_ADDED",
+        summary=f"Registered new site profile: {site.site_name} ({site.site_id})",
+        details=site.model_dump()
+    )
+    return {"status": "ok", "site": site.model_dump()}
 
 @app.get("/api/calls")
 def get_calls():
@@ -103,20 +129,101 @@ def get_call(call_id: str):
 def get_metrics():
     return metrics.model_dump()
 
+# --- DOCUMENT UPLOAD & INSPECTION ENDPOINTS ---
+
+@app.post("/api/documents/upload")
+async def upload_and_inspect_document(
+    file: UploadFile = File(...),
+    site_id: Optional[str] = Form(None)
+):
+    target_site = site_id or config.active_site_id
+    content = await file.read()
+    
+    if len(content) == 0:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    
+    # Inspect document
+    audit_res = inspect_uploaded_document(file.filename, content, site_id=target_site)
+    
+    log_timeline_event(
+        event_type="DOCUMENT_AUDITED",
+        summary=f"Audited document '{file.filename}' ({audit_res.summary.file_type}): {audit_res.summary.total_calls_detected} calls, {audit_res.summary.phantom_bookings} phantoms, {audit_res.summary.tz_corrupted_bookings} timezone drifts",
+        details=audit_res.summary.model_dump()
+    )
+
+    await manager.broadcast({
+        "type": "DOCUMENT_AUDITED",
+        "summary": audit_res.summary.model_dump()
+    })
+
+    return audit_res.model_dump()
+
+@app.get("/api/documents/history")
+def get_documents_history():
+    return load_audit_history()
+
+@app.get("/api/documents/{doc_id}")
+def get_document_audit(doc_id: str):
+    history = load_audit_history()
+    for h in history:
+        if h.get("summary", {}).get("doc_id") == doc_id:
+            return h
+    raise HTTPException(status_code=404, detail="Document audit not found")
+
+@app.post("/api/documents/quick-sample")
+async def run_quick_sample_audit():
+    sample_file = "2-call-records.md"
+    if not os.path.exists(sample_file):
+        raise HTTPException(status_code=404, detail="Sample pack not found")
+    with open(sample_file, "rb") as f:
+        content = f.read()
+    audit_res = inspect_uploaded_document("2-call-records.md (Sparsh Kothrud Pack)", content, site_id="KTD-04")
+    log_timeline_event(
+        event_type="DOCUMENT_AUDITED",
+        summary="Audited built-in sample pack (2-call-records.md): 20 calls evaluated",
+        details=audit_res.summary.model_dump()
+    )
+    return audit_res.model_dump()
+
+# --- TIMELINE & UPDATES ENDPOINTS ---
+
+@app.get("/api/timeline")
+def get_timeline():
+    return get_timeline_events()
+
+@app.post("/api/timeline/note")
+async def add_operational_note(summary: str = Form(...), actor: str = Form("FDE Lead")):
+    event = log_timeline_event(
+        event_type="OPERATIONAL_NOTE",
+        summary=summary,
+        actor=actor
+    )
+    await manager.broadcast({
+        "type": "TIMELINE_EVENT",
+        "event": event.model_dump()
+    })
+    return event.model_dump()
+
+@app.get("/api/download/case-study-pdf")
+def download_case_study_pdf():
+    pdf_path = os.path.join(os.path.dirname(__file__), "Spyne_FDE_Case_Study_Pune_Workshop_Diagnostics.pdf")
+    if os.path.exists(pdf_path):
+        return FileResponse(
+            pdf_path,
+            media_type="application/pdf",
+            filename="Spyne_FDE_Case_Study_Pune_Workshop_Diagnostics.pdf"
+        )
+    raise HTTPException(status_code=404, detail="PDF not found")
+
 @app.post("/api/simulate-call")
 async def simulate_incoming_call(scenario: str = "phantom_booking"):
-    """
-    Simulates a live incoming call handled in real-time, passing through the proxy.
-    """
     sample_id = f"SIM-{len(audited_sessions)+1:02d}"
     if scenario == "phantom_booking":
-        # Simulate customer asking price and proxy intercepting false booking
         proxy.get_session(sample_id)
         proxy.on_lookup_customer_response(sample_id, {"customer_id": "C9999", "open_job_cards": []})
         proxy.on_check_availability_response(sample_id, {"service_type": "periodic"}, {
             "slots": [{"slot_id": "S-SIM-1", "start": "2026-08-25T04:30:00Z"}]
         })
-        # Assistant attempts to log "booked" without booking appointment
         corrected_outcome = proxy.on_log_outcome_request(sample_id, {"outcome": "booked", "notes": "Price query"})
         
         sim_session = CallSession(
@@ -169,7 +276,12 @@ async def simulate_incoming_call(scenario: str = "phantom_booking"):
     engine.evaluate_session(sim_session)
     audited_sessions.insert(0, sim_session)
     
-    # Broadcast to all connected WebSockets
+    log_timeline_event(
+        event_type="REMEDIATION_TRIGGERED",
+        summary=f"Real-time proxy intercepted simulated call {sim_session.call_id} ({scenario})",
+        details=sim_session.model_dump()
+    )
+
     await manager.broadcast({
         "type": "NEW_CALL_EVENT",
         "session": sim_session.model_dump()
@@ -179,7 +291,6 @@ async def simulate_incoming_call(scenario: str = "phantom_booking"):
 @app.websocket("/ws/live-feed")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
-    # Send initial snapshot
     await websocket.send_json({
         "type": "INITIAL_SNAPSHOT",
         "metrics": metrics.model_dump(),
@@ -188,7 +299,6 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            # Heartbeat ping/pong
             if data == "ping":
                 await websocket.send_text("pong")
     except WebSocketDisconnect:
@@ -209,5 +319,5 @@ def index_page():
 
 if __name__ == "__main__":
     import uvicorn
-    print("Starting PulseWorkshop 24x7 Diagnostics Server on http://localhost:8000 ...")
+    print("Starting PulseWorkshop 24x7 Enterprise Diagnostics Server on http://localhost:8000 ...")
     uvicorn.run(app, host="0.0.0.0", port=8000)

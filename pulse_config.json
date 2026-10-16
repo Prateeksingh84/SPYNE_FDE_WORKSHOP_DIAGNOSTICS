@@ -1,0 +1,115 @@
+{
+  "active_site_id": "KTD-04",
+  "sites": {
+    "KTD-04": {
+      "site_id": "KTD-04",
+      "site_name": "Sparsh Motors, Kothrud Workshop",
+      "timezone": "Asia/Kolkata",
+      "timezone_offset_minutes": 330,
+      "enabled_services": [
+        "periodic",
+        "diagnostic",
+        "inspection"
+      ],
+      "bodyshop_enabled": false,
+      "schedule": {
+        "monday": {
+          "open_time": "09:00",
+          "close_time": "18:00",
+          "is_closed": false
+        },
+        "tuesday": {
+          "open_time": "09:00",
+          "close_time": "18:00",
+          "is_closed": false
+        },
+        "wednesday": {
+          "open_time": "09:00",
+          "close_time": "18:00",
+          "is_closed": false
+        },
+        "thursday": {
+          "open_time": "09:00",
+          "close_time": "18:00",
+          "is_closed": false
+        },
+        "friday": {
+          "open_time": "09:00",
+          "close_time": "18:00",
+          "is_closed": false
+        },
+        "saturday": {
+          "open_time": "09:00",
+          "close_time": "18:00",
+          "is_closed": false
+        },
+        "sunday": {
+          "open_time": "09:00",
+          "close_time": "18:00",
+          "is_closed": true
+        }
+      },
+      "max_transfer_wait_sec": 45,
+      "unanswered_rings_threshold": 4,
+      "auto_remediation_enabled": true
+    },
+    "ATX-01": {
+      "site_id": "ATX-01",
+      "site_name": "Lone Star Ford, Austin",
+      "timezone": "America/Chicago",
+      "timezone_offset_minutes": -300,
+      "enabled_services": [
+        "periodic",
+        "diagnostic",
+        "inspection",
+        "bodyshop"
+      ],
+      "bodyshop_enabled": true,
+      "schedule": {
+        "monday": {
+          "open_time": "07:30",
+          "close_time": "19:00",
+          "is_closed": false
+        },
+        "tuesday": {
+          "open_time": "07:30",
+          "close_time": "19:00",
+          "is_closed": false
+        },
+        "wednesday": {
+          "open_time": "07:30",
+          "close_time": "19:00",
+          "is_closed": false
+        },
+        "thursday": {
+          "open_time": "07:30",
+          "close_time": "19:00",
+          "is_closed": false
+        },
+        "friday": {
+          "open_time": "07:30",
+          "close_time": "19:00",
+          "is_closed": false
+        },
+        "saturday": {
+          "open_time": "08:00",
+          "close_time": "17:00",
+          "is_closed": false
+        },
+        "sunday": {
+          "open_time": "09:00",
+          "close_time": "18:00",
+          "is_closed": true
+        }
+      },
+      "max_transfer_wait_sec": 45,
+      "unanswered_rings_threshold": 4,
+      "auto_remediation_enabled": true
+    }
+  },
+  "alert_channels": [
+    "websocket",
+    "log"
+  ],
+  "strict_invariant_mode": true
+}
